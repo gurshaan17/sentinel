@@ -6,9 +6,11 @@ const pubsub = new PubSub({
 });
 
 try {
-  const [topics] = await pubsub.getTopics();
-  console.log("✅ PubSub connection successful");
-  console.log("Topics:", topics.map(t => t.name));
+    const topic = pubsub.topic(process.env.PUBSUB_TOPIC_NAME!);
+    await topic.publishMessage({
+      json: { test: 'ping' },
+    });
+    console.log("✅ PubSub connection successful");
 } catch (error) {
-  console.error("❌ PubSub connection failed:", error);
+    console.error("❌ PubSub connection failed:", error);
 }
