@@ -1,4 +1,5 @@
 import { dockerConfig } from "./docker.config";
+import { loggerConfig } from "./logger.config";
 import { pubsubConfig } from "./pubsub.config";
 
 export const config = {
@@ -18,13 +19,10 @@ export const config = {
       includeImages: process.env.INCLUDE_IMAGES?.split(',') || [],
     },
     
-    logging: {
-      level: process.env.LOG_LEVEL || 'info',
-      pretty: process.env.NODE_ENV !== 'production',
-    },
+    logging: loggerConfig,
   } as const;
   
   // Validate required config
-  if (!config.pubsub.projectId) {
+if (!config.pubsub.projectId) {
     throw new Error('GCP_PROJECT_ID is required');
-  }
+}
