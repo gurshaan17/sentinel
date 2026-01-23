@@ -1,5 +1,5 @@
 import type { DockerService } from '../services/docker/DockerService';
-import type { RawLog } from '../types/log.types';
+import type { RawLog } from '../types';
 import { logger } from '../utils/logger'
 import { config } from '../config';
 

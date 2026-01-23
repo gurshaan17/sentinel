@@ -1,6 +1,5 @@
 import { PubSub, Topic } from '@google-cloud/pubsub';
-import type { ClassifiedLog } from '../../types/log.types';
-import type { PubSubMessage } from '../../types/pubsub.types';
+import type { ClassifiedLog, PubSubMessage } from '../../types';
 import { config } from '../../config';
 import { logger } from '../../utils/logger';
 import { v4 as uuidv4 } from 'uuid';

@@ -1,6 +1,5 @@
 import Docker from 'dockerode';
-import type { RawLog } from '../../types/log.types';
-import type { LogStreamOptions } from '../../types/docker.types';
+import type { RawLog, LogStreamOptions } from '../../types';
 import { logger } from '../../utils/logger';
 
 export class LogStreamer {

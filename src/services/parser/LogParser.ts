@@ -1,4 +1,4 @@
-import type { RawLog, ParsedLog } from '../../types/log.types';
+import type { RawLog, ParsedLog } from '../../types';
 import { logError } from '../../utils/ErrorLogger';
 import { logger } from '../../utils/logger';
 

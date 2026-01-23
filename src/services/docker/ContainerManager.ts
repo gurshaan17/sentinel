@@ -1,5 +1,5 @@
 import Docker from 'dockerode';
-import type { ContainerInfo } from '../../types/docker.types';
+import type { ContainerInfo } from '../../types';
 import { logger } from '../../utils/logger';
 import { config } from '../../config';
 import { logError } from '../../utils/ErrorLogger';

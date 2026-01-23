@@ -1,4 +1,4 @@
-import type { ParsedLog, ClassifiedLog, LogSeverity } from '../../types/log.types';
+import type { ParsedLog, ClassifiedLog, LogSeverity } from '../../types';
 import { errorPatterns } from './patterns/error.patterns';
 import { warningPatterns } from './patterns/warning.patterns';
 
