@@ -4,6 +4,7 @@ import type { PubSubMessage } from '../../types/pubsub.types';
 import { config } from '../../config';
 import { logger } from '../../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
+import { logError } from '../../utils/ErrorLogger';
 
 export class PubSubService {
   private pubsub: PubSub;
@@ -24,7 +25,7 @@ export class PubSubService {
       
       logger.info(`✅ Connected to PubSub topic: ${config.pubsub.topicName}`);
     } catch (error) {
-      logger.error('Failed to initialize PubSub:', error);
+      logError('Failed to initialize PubSub:', error);
       throw error;
     }
   }
@@ -54,7 +55,7 @@ export class PubSubService {
       logger.debug(`Published log ${message.id} to PubSub (${messageId})`);
       return messageId;
     } catch (error) {
-      logger.error('Failed to publish to PubSub:', error);
+      logError('Failed to publish to PubSub:', error);
       throw error;
     }
   }

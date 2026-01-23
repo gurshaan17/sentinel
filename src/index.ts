@@ -1,9 +1,9 @@
 import { logger } from './utils/logger';
 import { ContainerMonitor } from './monitors/ContainerMonitor';
-import { DockerService } from './services/docker';
-import { PubSubService } from './services/pubsub';
-import { LogParser } from './services/parser';
-import { config } from './config';
+import { DockerService } from './services/docker/DockerService';
+import { PubSubService } from './services/pubsub/PubSubService';
+import { LogParser } from './services/parser/LogParser';
+// import { config } from './config';
 import { logError } from './utils/ErrorLogger';
 
 class Sentinel {
