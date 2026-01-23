@@ -1,14 +1,10 @@
 import { dockerConfig } from "./docker.config";
+import { pubsubConfig } from "./pubsub.config";
 
 export const config = {
     docker: dockerConfig,
     
-    pubsub: {
-      projectId: process.env.GCP_PROJECT_ID!,
-      topicName: process.env.PUBSUB_TOPIC_NAME || 'sentinel-logs',
-      subscriptionName: process.env.PUBSUB_SUBSCRIPTION_NAME || 'sentinel-workers',
-      credentialsPath: process.env.GCP_CREDENTIALS_PATH,
-    },
+    pubsub: pubsubConfig,
     
     monitoring: {
       pollInterval: 10000, // Check for new containers every 10s
