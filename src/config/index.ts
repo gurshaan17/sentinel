@@ -1,11 +1,7 @@
+import { dockerConfig } from "./docker.config";
+
 export const config = {
-    docker: {
-      socketPath: process.env.DOCKER_SOCKET_PATH || '/var/run/docker.sock',
-      host: process.env.DOCKER_HOST,
-      port: process.env.DOCKER_PORT ? parseInt(process.env.DOCKER_PORT) : undefined,
-      reconnectInterval: 5000,
-      maxReconnectAttempts: 10,
-    },
+    docker: dockerConfig,
     
     pubsub: {
       projectId: process.env.GCP_PROJECT_ID!,
