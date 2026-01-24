@@ -68,6 +68,22 @@ export class PubSubService {
     return Promise.all(promises);
   }
 
+  async publishHealthCheck(): Promise<void> {
+    if (!this.topic) {
+      throw new Error('PubSub not initialized');
+    }
+  
+    await this.topic.publishMessage({
+      json: {
+        type: 'health-check',
+        timestamp: new Date().toISOString(),
+      },
+      attributes: {
+        source: 'service-health',
+      },
+    });
+  }  
+
   async close(): Promise<void> {
     await this.pubsub.close();
     logger.info('PubSub connection closed');

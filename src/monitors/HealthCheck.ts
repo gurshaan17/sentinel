@@ -43,20 +43,19 @@ export class HealthCheck {
 
   async checkPubSub(): Promise<ServiceHealth> {
     try {
-      // Simple check - try to get topic metadata
-      await this.pubsubService.getPublisher();
-      
+      await this.pubsubService.publishHealthCheck();
+  
       this.lastPubSubCheck = new Date();
-      
+  
       return {
         status: 'healthy',
-        message: 'PubSub is responsive',
+        message: 'PubSub publish succeeded',
         lastCheck: this.lastPubSubCheck,
         uptime: Date.now() - this.startTime.getTime(),
       };
     } catch (error) {
       logError('PubSub health check failed:', error);
-      
+  
       return {
         status: 'unhealthy',
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -65,6 +64,7 @@ export class HealthCheck {
       };
     }
   }
+  
 
   async checkAll(): Promise<{
     overall: 'healthy' | 'degraded' | 'unhealthy';
@@ -103,16 +103,16 @@ export class HealthCheck {
     return setInterval(async () => {
       const health = await this.checkAll();
       
-      logger.info('Health check results:', {
+      logger.info({
         overall: health.overall,
         docker: health.services.docker.status,
         pubsub: health.services.pubsub.status,
-      });
+      }, 'Health check results:');
 
       if (health.overall === 'unhealthy') {
-        logger.error('System is unhealthy!', health);
+        logger.error(health, 'System is unhealthy!');
       } else if (health.overall === 'degraded') {
-        logger.warn('System is degraded', health);
+        logger.warn(health, 'System is degraded');
       }
     }, this.checkIntervalMs);
   }
