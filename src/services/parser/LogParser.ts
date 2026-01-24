@@ -1,8 +1,14 @@
 import type { RawLog, ParsedLog } from '../../types';
 import { logError } from '../../utils/ErrorLogger';
-import { logger } from '../../utils/logger';
 
 export class LogParser {
+
+  private getString(
+    value: unknown
+  ): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+  }  
+
   parse(raw: RawLog): ParsedLog {
     try {
       // Try to parse as JSON first (structured logs)
@@ -11,8 +17,8 @@ export class LogParser {
       if (structured) {
         return {
           ...raw,
-          level: structured.level || structured.severity,
-          component: structured.component || structured.service,
+          level: this.getString(structured.level || structured.severity),
+          component: this.getString(structured.component || structured.service),
           structured,
         };
       }
