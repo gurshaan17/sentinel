@@ -11,6 +11,7 @@ export const config = {
       pollInterval: 10000, // Check for new containers every 10s
       logBufferSize: 100,  // Buffer 100 logs before flushing
       maxLogsPerSecond: 1000,
+      healthCheckInterval: 60000,
     },
     
     filters: {

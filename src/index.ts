@@ -8,6 +8,7 @@ import { LogClassifier } from './services/parser/LogClassifier';
 import { config } from './config';
 import { setupGlobalErrorHandlers } from './middleware/errorHandler';
 import { logRateLimiter } from './middleware/rateLimiter';
+import { logError } from './utils/ErrorLogger';
 
 class Sentinel {
   private dockerService: DockerService;
@@ -79,7 +80,7 @@ class Sentinel {
         try {
           await this.pubsubService.publish(classified);
         } catch (error) {
-          logger.error('Failed to publish log to PubSub:', error);
+          logError('Failed to publish log to PubSub:', error);
         }
       });
 
@@ -88,7 +89,7 @@ class Sentinel {
       logger.info('Press Ctrl+C to stop');
       
     } catch (error) {
-      logger.error('Failed to start Sentinel:', error);
+      logError('Failed to start Sentinel:', error);
       process.exit(1);
     }
   }
