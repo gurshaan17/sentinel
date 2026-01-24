@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Sentinel Agent
+  sentinel:
+    build: .
+    container_name: sentinel
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./gcp-credentials.json:/app/gcp-credentials.json:ro
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    restart: unless-stopped
+    depends_on:
+      - test-app-1
+      - test-app-2
+
+  # Test Application 1 (with monitoring)
+  test-app-1:
+    build: ./test-app
+    container_name: test-app-1
+    ports:
+      - "3001:3000"
+    labels:
+      - "sentinel.monitor=true"
+      - "app=test"
+    restart: unless-stopped
+
+  # Test Application 2 (with monitoring)
+  test-app-2:
+    build: ./test-app
+    container_name: test-app-2
+    ports:
+      - "3002:3000"
+    labels:
+      - "sentinel.monitor=true"
+      - "app=test"
+    restart: unless-stopped
+
+  # Test Application 3 (ignored by Sentinel)
+  test-app-ignored:
+    build: ./test-app
+    container_name: test-app-ignored
+    ports:
+      - "3003:3000"
+    labels:
+      - "sentinel.ignore=true"
+    restart: unless-stopped

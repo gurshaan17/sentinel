@@ -1,0 +1,16 @@
+FROM oven/bun:1-alpine AS base
+WORKDIR /app
+
+FROM base AS dependencies
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile --production
+
+FROM base AS production
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY src ./src
+COPY package.json ./
+
+RUN addgroup -S sentinel && adduser -S sentinel -G sentinel
+USER sentinel
+
+CMD ["bun", "run", "src/index.ts"]

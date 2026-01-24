@@ -1,6 +1,8 @@
 import Docker from 'dockerode';
 import type { RawLog, LogStreamOptions } from '../../types';
 import { logger } from '../../utils/logger';
+import { logError } from '../../utils/ErrorLogger';
+import type { Readable } from 'stream';
 
 export class LogStreamer {
   constructor(private docker: Docker) {}
@@ -19,7 +21,10 @@ export class LogStreamer {
     const container = this.docker.getContainer(containerId);
 
     try {
-      const stream = await container.logs(options);
+      const stream = (await container.logs({
+        ...options,
+        follow: true,
+      } as const)) as Readable;
 
       stream.on('data', async (chunk: Buffer) => {
         const lines = this.parseDockerLogChunk(chunk);
@@ -37,7 +42,7 @@ export class LogStreamer {
         }
       });
 
-      stream.on('error', (error) => {
+      stream.on('error', (error: any) => {
         logger.error(`Stream error for ${containerName}:`, error);
       });
 
@@ -45,7 +50,7 @@ export class LogStreamer {
         logger.debug(`Stream ended for ${containerName}`);
       });
     } catch (error) {
-      logger.error(`Failed to stream logs for ${containerName}:`, error);
+      logError(`Failed to stream logs for ${containerName}:`, error);
       throw error;
     }
   }

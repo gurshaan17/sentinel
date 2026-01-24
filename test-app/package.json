@@ -1,0 +1,9 @@
+{
+    "name": "test-app",
+    "version": "1.0.0",
+    "description": "Test application for Sentinel",
+    "main": "app.js",
+    "scripts": {
+      "start": "node app.js"
+    }
+}

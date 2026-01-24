@@ -4,6 +4,7 @@ import { logger } from '../../utils/logger';
 import { ContainerManager } from './ContainerManager';
 import { LogStreamer } from './LogStreamer';
 import { logError } from '../../utils/ErrorLogger';
+import type { DockerEvent } from '../../types';
 
 export class DockerService {
   private docker: Docker;
@@ -44,12 +45,12 @@ export class DockerService {
   }
 
   // Event listeners for container lifecycle
-  async watchEvents(callback: (event: Docker.EventMessage) => void): Promise<void> {
+  async watchEvents(callback: (event: DockerEvent) => void): Promise<void> {
     const stream = await this.docker.getEvents();
     
     stream.on('data', (chunk: Buffer) => {
       try {
-        const event = JSON.parse(chunk.toString()) as Docker.EventMessage;
+        const event = JSON.parse(chunk.toString()) as DockerEvent;
         callback(event);
       } catch (error) {
         logError('Failed to parse Docker event:', error);
