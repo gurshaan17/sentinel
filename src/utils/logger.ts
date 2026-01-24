@@ -1,16 +1,28 @@
 import pino from 'pino';
-import { config } from '../config';
+import { loggerConfig } from '../config/logger.config';
 
 export const logger = pino({
-  level: config.logging.level,
-  transport: config.logging.pretty
+  level: loggerConfig.level,
+  transport: loggerConfig.pretty
     ? {
         target: 'pino-pretty',
         options: {
           colorize: true,
-          translateTime: 'HH:MM:ss',
+          translateTime: 'HH:MM:ss Z',
           ignore: 'pid,hostname',
+          messageFormat: '{levelLabel} - {msg}',
         },
       }
     : undefined,
+  
+  // Redact sensitive data
+  redact: loggerConfig.redact && {
+    ...loggerConfig.redact,
+    paths: [...loggerConfig.redact.paths],
+  },
+  
+  // Custom serializers
+  serializers: {
+    error: pino.stdSerializers.err,
+  },
 });

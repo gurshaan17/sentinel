@@ -1,6 +1,6 @@
 import { logger } from '../src/utils/logger';
 import { RateLimiter } from '../src/middleware/rateLimiter';
-// import { retry } from '../src/utils/retry';
+import { retry } from '../src/utils/retry';
 
 // Test logger
 logger.info('Testing logger...');
@@ -25,6 +25,6 @@ const failTwice = async () => {
   return 'Success!';
 };
 
-// retry(failTwice, { maxAttempts: 5, delayMs: 100 })
-//   .then(result => console.log('Retry result:', result))
-//   .catch(err => console.error('Retry failed:', err));
+retry(failTwice, { maxAttempts: 5, delayMs: 100 })
+  .then(result => console.log('Retry result:', result))
+  .catch(err => console.error('Retry failed:', err));
