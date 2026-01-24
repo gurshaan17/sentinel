@@ -33,20 +33,8 @@ if (!envExists) {
   console.log("✅ .env file exists\n");
 }
 
-// Check GCP credentials
-console.log("4. Checking GCP credentials...");
-const env = await Bun.file(".env").text();
-const credPath = env.match(/GCP_CREDENTIALS_PATH=(.+)/)?.[1];
-if (credPath && await Bun.file(credPath).exists()) {
-  console.log("✅ GCP credentials found\n");
-} else {
-  console.log("⚠️  GCP credentials not found. You'll need to:");
-  console.log("   1. Download service account JSON from GCP Console");
-  console.log("   2. Save it to the path specified in .env");
-  console.log("   3. Run: bun run setup:gcp\n");
-}
 
-console.log("5. Building project...");
+console.log("4. Building project...");
 await $`bun run build`;
 console.log("✅ Build successful\n");
 

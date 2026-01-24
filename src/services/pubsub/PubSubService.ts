@@ -12,7 +12,6 @@ export class PubSubService {
   constructor() {
     this.pubsub = new PubSub({
       projectId: config.pubsub.projectId,
-      keyFilename: config.pubsub.credentialsPath,
     });
   }
 

@@ -2,7 +2,6 @@ export const pubsubConfig = {
     projectId: process.env.GCP_PROJECT_ID!,
     topicName: process.env.PUBSUB_TOPIC_NAME || 'sentinel-logs',
     subscriptionName: process.env.PUBSUB_SUBSCRIPTION_NAME || 'sentinel-workers',
-    credentialsPath: process.env.GCP_CREDENTIALS_PATH,
     
     // Publishing options
     batching: {
