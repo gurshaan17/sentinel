@@ -5,12 +5,22 @@ import { logger } from '../../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 import { logError } from '../../utils/ErrorLogger';
 
+function sanitizeAttributes(
+  attrs: Record<string, unknown>
+): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(attrs)
+      .filter(([, v]) => v !== undefined && v !== null)
+      .map(([k, v]) => [k, String(v)])
+  );
+}
+
 export class Publisher {
   private topic: Topic;
-  private messageBuffer: PubSubMessage[] = [];
+  private buffer: PubSubMessage[] = [];
   private flushTimer: Timer | null = null;
 
-  constructor(private pubsub: PubSub, topicName: string) {
+  constructor(pubsub: PubSub, topicName: string) {
     this.topic = pubsub.topic(topicName, {
       batching: pubsubConfig.batching,
     });
@@ -20,74 +30,63 @@ export class Publisher {
     const message: PubSubMessage = {
       id: uuidv4(),
       log,
-      publishedAt: new Date(),
-      attributes: {
-        severity: log.severity,
-        containerId: log.containerId,
-        containerName: log.containerName,
-      },
+      publishedAt: new Date().toISOString(),
     };
+
+    const attributes = sanitizeAttributes(attributes);
+
+    const payloadBytes = Buffer.byteLength(
+      JSON.stringify(message),
+      'utf8'
+    );
+
+    if (payloadBytes > 9_000_000) {
+      logError('PubSub message too large, skipping', {
+        bytes: payloadBytes,
+        containerId: log.containerId,
+      });
+      return 'skipped-too-large';
+    }
 
     try {
       const messageId = await this.topic.publishMessage({
         json: message,
-        attributes: message.attributes,
+        attributes,
       });
 
-      logger.debug(`Published message ${message.id} to PubSub (messageId: ${messageId})`);
+      logger.debug(`Published message ${message.id} (${messageId})`);
       return messageId;
     } catch (error) {
-      logError('Failed to publish message:', error);
+      logError('Failed to publish message', {
+        error,
+        payloadBytes,
+        attributes,
+      });
       throw error;
     }
   }
 
-  async publishBatch(logs: ClassifiedLog[]): Promise<string[]> {
-    const publishPromises = logs.map(log => this.publish(log));
-    
-    try {
-      const messageIds = await Promise.allSettled(publishPromises);
-      
-      const successful = messageIds.filter(
-        result => result.status === 'fulfilled'
-      ).length;
-      
-      logger.info(`Published batch: ${successful}/${logs.length} messages succeeded`);
-      
-      return messageIds
-        .filter((result): result is PromiseFulfilledResult<string> => 
-          result.status === 'fulfilled'
-        )
-        .map(result => result.value);
-    } catch (error) {
-      logError('Failed to publish batch:', error);
-      throw error;
-    }
-  }
-
-  // Buffer messages and flush periodically for better performance
   bufferAndPublish(log: ClassifiedLog): void {
     const message: PubSubMessage = {
       id: uuidv4(),
       log,
-      publishedAt: new Date(),
+      publishedAt: new Date().toISOString(),
       attributes: {
-        severity: log.severity,
-        containerId: log.containerId,
-        containerName: log.containerName,
+        severity: String(log.severity),
+        containerId: String(log.containerId),
+        containerName: String(log.containerName),
       },
     };
 
-    this.messageBuffer.push(message);
+    this.buffer.push(message);
 
-    // Auto-flush if buffer is full
-    if (this.messageBuffer.length >= pubsubConfig.batching.maxMessages) {
-      this.flush();
+    if (this.buffer.length >= pubsubConfig.batching.maxMessages) {
+      void this.flush();
     } else if (!this.flushTimer) {
-      // Set timer for periodic flush
-      this.flushTimer = setTimeout(() => {
-        this.flush();
-      }, pubsubConfig.batching.maxMilliseconds);
+      this.flushTimer = setTimeout(
+        () => void this.flush(),
+        pubsubConfig.batching.maxMilliseconds
+      );
     }
   }
 
@@ -97,32 +96,29 @@ export class Publisher {
       this.flushTimer = null;
     }
 
-    if (this.messageBuffer.length === 0) {
-      return;
-    }
+    if (this.buffer.length === 0) return;
 
-    const toPublish = [...this.messageBuffer];
-    this.messageBuffer = [];
+    const batch = [...this.buffer];
+    this.buffer = [];
 
     try {
-      const promises = toPublish.map(msg =>
-        this.topic.publishMessage({
-          json: msg,
-          attributes: msg.attributes,
-        })
+      await Promise.all(
+        batch.map(msg =>
+          this.topic.publishMessage({
+            json: msg,
+            attributes: sanitizeAttributes(msg.attributes),
+          })
+        )
       );
 
-      await Promise.all(promises);
-      logger.debug(`Flushed ${toPublish.length} buffered messages`);
+      logger.debug(`Flushed ${batch.length} buffered messages`);
     } catch (error) {
-      logError('Failed to flush buffer:', error);
-      // Re-add failed messages to buffer
-      this.messageBuffer.unshift(...toPublish);
+      logError('Failed to flush PubSub buffer', error);
+      this.buffer.unshift(...batch);
     }
   }
 
   async close(): Promise<void> {
-    // Flush remaining messages
     await this.flush();
     logger.info('Publisher closed');
   }

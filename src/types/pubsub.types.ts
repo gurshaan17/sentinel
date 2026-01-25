@@ -3,12 +3,7 @@ import type { ClassifiedLog } from './log.types';
 export interface PubSubMessage {
   id: string;
   log: ClassifiedLog;
-  publishedAt: Date;
-  attributes: {
-    severity: string;
-    containerId: string;
-    containerName: string;
-  };
+  publishedAt: string;
 }
 
 export interface PublishOptions {
