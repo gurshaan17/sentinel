@@ -4,19 +4,18 @@ services:
   sentinel:
     build: .
     container_name: sentinel
-
     volumes:
+      # Mount the actual Docker socket path for macOS
       - /var/run/docker.sock:/var/run/docker.sock
-      - /Users/gurshaansinghdult/.config/gcloud:/home/sentinel/.config/gcloud:ro
-
+      - /Users/gurshaansinghdult/.config/gcloud:/root/.config/gcloud:ro
     environment:
       NODE_ENV: development
       LOG_LEVEL: debug
       GCP_PROJECT_ID: ${GCP_PROJECT_ID}
       PUBSUB_TOPIC_NAME: logs
-
+    # Run as root for Docker Desktop compatibility
+    user: "0:0"
     restart: unless-stopped
-
     depends_on:
       - test-app-1
       - test-app-2

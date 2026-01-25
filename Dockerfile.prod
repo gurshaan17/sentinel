@@ -1,16 +1,36 @@
-FROM oven/bun:1-alpine AS base
+FROM oven/bun:1 AS base
 WORKDIR /app
 
 FROM base AS dependencies
-COPY package.json bun.lockb ./
-RUN bun install --frozen-lockfile --production
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile
+
+FROM base AS build
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY . .
+RUN bun run build
 
 FROM base AS production
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY src ./src
-COPY package.json ./
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile --production
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/src ./src
 
-RUN addgroup -S sentinel && adduser -S sentinel -G sentinel
+# For Linux production
+RUN groupadd -r sentinel -g 1001 && \
+    useradd -r -u 1001 -g sentinel sentinel && \
+    mkdir -p /app/logs && \
+    chown -R sentinel:sentinel /app
+
 USER sentinel
 
-CMD ["bun", "run", "src/index.ts"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD bun run src/health-check.ts || exit 1
+
+LABEL maintainer="gurshaansinghd@gmail.com"
+LABEL description="Sentinel - AI-powered container auto-scaling agent"
+LABEL version="0.1.0"
+
+CMD ["bun", "run", "start"]
+
+# user: "1001:999"  # Will work on Linux, add to prod
