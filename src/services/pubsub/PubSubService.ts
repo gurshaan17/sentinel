@@ -7,7 +7,7 @@ import { logError } from '../../utils/ErrorLogger';
 
 export class PubSubService {
   private pubsub: PubSub;
-  private topic: Topic | null = null;
+  private topic!: Topic;
 
   constructor() {
     this.pubsub = new PubSub({
@@ -16,14 +16,14 @@ export class PubSubService {
   }
 
   async initialize(): Promise<void> {
-    try {
-      // Get or create topic
-      const [topic] = await this.pubsub.topic(config.pubsub.topicName).get({ autoCreate: true });
-      this.topic = topic;
-      
-      logger.info(`✅ Connected to PubSub topic: ${config.pubsub.topicName}`);
+      try {
+
+      this.topic = this.pubsub.topic(config.pubsub.topicName);
+      logger.info(
+        `PubSub ready for topic: ${config.pubsub.topicName}`
+      );
     } catch (error) {
-      logError('Failed to initialize PubSub:', error);
+      logError('Failed to initialize PubSub', error);
       throw error;
     }
   }
