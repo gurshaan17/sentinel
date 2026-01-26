@@ -6,15 +6,13 @@ services:
     container_name: sentinel
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      # Mount ADC file directly to where Google SDK expects it
-      - /Users/gurshaansinghdult/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json:ro
+      - ./sentinel-sa.json:/app/sa.json:ro
     environment:
       NODE_ENV: development
       LOG_LEVEL: debug
-      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GCP_PROJECT_ID: sentinel17
       PUBSUB_TOPIC_NAME: logs
-      # Explicitly set credentials path
-      GOOGLE_APPLICATION_CREDENTIALS: /root/.config/gcloud/application_default_credentials.json
+      GOOGLE_APPLICATION_CREDENTIALS: /app/sa.json
     user: "0:0"
     restart: unless-stopped
     depends_on:

@@ -35,7 +35,10 @@ export class PubSubService {
   constructor() {
     this.pubsub = new PubSub({
       projectId: config.pubsub.projectId,
+      //@ts-ignore
+      fallback: true,
     });
+    
   }
 
   async initialize(): Promise<void> {
