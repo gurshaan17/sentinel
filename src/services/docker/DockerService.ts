@@ -47,13 +47,27 @@ export class DockerService {
   // Event listeners for container lifecycle
   async watchEvents(callback: (event: DockerEvent) => void): Promise<void> {
     const stream = await this.docker.getEvents();
-    
+    let buffer = '';
+
     stream.on('data', (chunk: Buffer) => {
-      try {
-        const event = JSON.parse(chunk.toString()) as DockerEvent;
-        callback(event);
-      } catch (error) {
-        logError('Failed to parse Docker event:', error);
+      buffer += chunk.toString('utf8');
+
+      let newlineIndex: number;
+      while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, newlineIndex).trim();
+        buffer = buffer.slice(newlineIndex + 1);
+
+        if (!line) continue;
+
+        try {
+          const event = JSON.parse(line) as DockerEvent;
+          callback(event);
+        } catch (error) {
+          logError('Failed to parse Docker event line:', {
+            line,
+            error,
+          });
+        }
       }
     });
 

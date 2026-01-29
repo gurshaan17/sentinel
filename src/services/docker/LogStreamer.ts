@@ -5,7 +5,7 @@ import { logError } from '../../utils/ErrorLogger';
 import type { Readable } from 'stream';
 
 export class LogStreamer {
-  constructor(private docker: Docker) {}
+  constructor(private readonly docker: Docker) {}
 
   async streamLogs(
     containerId: string,
@@ -18,6 +18,11 @@ export class LogStreamer {
       timestamps: true,
     }
   ): Promise<void> {
+    if (containerName === 'sentinel') {
+      logger.debug(`Skipping log stream for self container: ${containerName}`);
+      return;
+    }
+
     const container = this.docker.getContainer(containerId);
 
     try {
@@ -27,50 +32,73 @@ export class LogStreamer {
       } as const)) as Readable;
 
       stream.on('data', async (chunk: Buffer) => {
-        const lines = this.parseDockerLogChunk(chunk);
-        
-        for (const line of lines) {
-          const rawLog: RawLog = {
+        try {
+          const lines = this.parseDockerLogChunk(chunk);
+
+          for (const line of lines) {
+            const rawLog: RawLog = {
+              containerId,
+              containerName,
+              timestamp: new Date(),
+              stream: line.stream,
+              message: line.message,
+            };
+
+            await onLog(rawLog);
+          }
+        } catch (err) {
+          logError('Failed to process Docker log chunk', {
             containerId,
             containerName,
-            timestamp: new Date(),
-            stream: line.stream,
-            message: line.message,
-          };
-
-          await onLog(rawLog);
+            error: err,
+          });
         }
       });
 
-      stream.on('error', (error: any) => {
-        logger.error(`Stream error for ${containerName}:`, error);
+      stream.on('error', (error) => {
+        logError(`Docker log stream error (${containerName})`, error);
       });
 
       stream.on('end', () => {
-        logger.debug(`Stream ended for ${containerName}`);
+        logger.debug(`Docker log stream ended for ${containerName}`);
       });
     } catch (error) {
-      logError(`Failed to stream logs for ${containerName}:`, error);
+      logError(`Failed to start log stream for ${containerName}`, error);
       throw error;
     }
   }
 
-  private parseDockerLogChunk(chunk: Buffer): Array<{ stream: 'stdout' | 'stderr'; message: string }> {
+  /**
+   * Docker log streams are binary-multiplexed:
+   * - 8-byte header
+   * - byte 0: stream type (1=stdout, 2=stderr)
+   * - bytes 4–7: message length (uint32 BE)
+   *
+   * This function safely parses the stream.
+   */
+  private parseDockerLogChunk(
+    chunk: Buffer
+  ): Array<{ stream: 'stdout' | 'stderr'; message: string }> {
     const lines: Array<{ stream: 'stdout' | 'stderr'; message: string }> = [];
-    
-    // Docker multiplexes stdout/stderr
-    // First byte indicates stream type: 1=stdout, 2=stderr
-    let offset = 0;
-    
-    while (offset < chunk.length) {
-      const header = chunk.subarray(offset, offset + 8);
-      if (header.length < 8) break;
 
-      const streamType = header[0];
-      const size = header.readUInt32BE(4);
-      
-      const message = chunk.subarray(offset + 8, offset + 8 + size).toString('utf8').trim();
-      
+    let offset = 0;
+
+    while (offset + 8 <= chunk.length) {
+      const streamType = chunk[offset];
+      const messageLength = chunk.readUInt32BE(offset + 4);
+
+      const messageStart = offset + 8;
+      const messageEnd = messageStart + messageLength;
+
+      if (messageEnd > chunk.length) {
+        break; // incomplete frame
+      }
+
+      const message = chunk
+        .subarray(messageStart, messageEnd)
+        .toString('utf8')
+        .trim();
+
       if (message) {
         lines.push({
           stream: streamType === 1 ? 'stdout' : 'stderr',
@@ -78,7 +106,7 @@ export class LogStreamer {
         });
       }
 
-      offset += 8 + size;
+      offset = messageEnd;
     }
 
     return lines;

@@ -10,7 +10,7 @@ export const logger = pino({
           colorize: true,
           translateTime: 'HH:MM:ss Z',
           ignore: 'pid,hostname',
-          messageFormat: '{levelLabel} - {msg}',
+          messageFormat: '{level} - {msg}',
         },
       }
     : undefined,

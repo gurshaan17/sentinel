@@ -21,7 +21,7 @@ export class ContainerMonitor {
     }, config.monitoring.pollInterval);
 
     // Watch for container events
-    await this.dockerService.watchEvents(async (event) => {
+    await this.dockerService.watchEvents(async (event: any) => {
       if (event.Type === 'container' && event.Action === 'start') {
         logger.info(`New container started: ${event.Actor.Attributes.name}`);
         await this.startStreamingContainer(event.Actor.ID, onLog);
