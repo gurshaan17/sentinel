@@ -18,11 +18,8 @@ export class LogPipeline {
 
     const analysis = await this.ai.analyze(context);
 
-    console.log('[AI] Raw analysis result:', analysis);
-
     if (!analysis.shouldIgnore) {
-        //@ts-ignore
-        logger.info('🤖 AI Analysis', analysis);
+        logger.info('AI Analysis', undefined, analysis);
     } else {
         console.log('[AI] Analysis ignored due to low confidence');
     }

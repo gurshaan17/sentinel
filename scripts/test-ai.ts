@@ -34,12 +34,12 @@ const mockLogs: ClassifiedLog[] = [
   },
 ];
 
-console.log('🚀 Starting AI test...');
+console.log('Starting AI test...');
 
 (async () => {
   for (const log of mockLogs) {
-    console.log('➡️ Ingesting log:', log.message);
+    console.log('Ingesting log:', log.message);
     await pipeline.ingest(log);
   }
-  console.log('✅ AI test completed');
+  console.log('AI test completed');
 })();
