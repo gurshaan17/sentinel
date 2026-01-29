@@ -3,11 +3,13 @@ import { AdvisorService } from '../advisors/AdvisorService';
 import { ContextBuilder } from '../services/ai/ContextBuilder';
 import type { ClassifiedLog } from '../types';
 import { logger } from '../utils/logger';
+import { ActionPipeline } from './ActionPipeline';
 
 export class AdvisoryPipeline {
   private ai = new AIService();
   private advisor = new AdvisorService();
   private contextBuilder = new ContextBuilder();
+  private actionPipeline = new ActionPipeline();
 
   async process(logs: ClassifiedLog[]): Promise<void> {
     if (logs.length === 0) return;
@@ -17,6 +19,9 @@ export class AdvisoryPipeline {
     const analysis = await this.ai.analyze(context);
 
     const advice = this.advisor.generate(analysis, logs);
+
+    //@ts-ignore
+    await this.actionPipeline.handle(advice);
 
     if (!advice) {
       logger.debug('No advisory generated');

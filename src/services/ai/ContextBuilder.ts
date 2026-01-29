@@ -1,5 +1,4 @@
-import type { ClassifiedLog } from '../../types';
-import type { AIContext } from '../../types/ai.types';
+import type { ClassifiedLog, AIContext } from '../../types';
 
 export class ContextBuilder {
   build(logs: ClassifiedLog[]): AIContext {

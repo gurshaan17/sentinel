@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';;
-import type { AIAnalysisResult } from '../types/ai.types';
+import type { AIAnalysisResult, Advice } from '../types';
 import type { ClassifiedLog } from '../types';
 import { logger } from '../utils/logger';
-import type { Advice } from '../types/advice.types';
 
 export class AdvisorService {
   generate(

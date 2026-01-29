@@ -1,6 +1,6 @@
 import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
-import type { AIAnalysisResult, AIContext } from '../../types/ai.types';
+import type { AIAnalysisResult, AIContext } from '../../types';
 import { PromptBuilder } from './PromptBuilder';
 import { logger } from '../../utils/logger';
 
