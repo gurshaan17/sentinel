@@ -24,7 +24,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.16",
     "@google-cloud/pubsub": "^5.2.2",
+    "ai": "^6.0.60",
     "dockerode": "^4.0.9",
     "pino": "^10.2.1",
     "pino-pretty": "^13.1.3",
