@@ -1,8 +1,7 @@
 import type { ClassifiedLog } from './log.types';
 
 export interface AIContext {
-  containerId: string;
-  containerName: string;
+  containerName?: string;
   recentLogs: ClassifiedLog[];
   windowStart: string | Date;
   windowEnd: string | Date;

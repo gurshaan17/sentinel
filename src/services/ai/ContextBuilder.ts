@@ -2,17 +2,14 @@ import type { ClassifiedLog } from '../../types';
 import type { AIContext } from '../../types/ai.types';
 
 export class ContextBuilder {
-  private readonly maxLogs = 20;
-
   build(logs: ClassifiedLog[]): AIContext {
-    const slice = logs.slice(-this.maxLogs);
+    const timestamps = logs.map(l => l.timestamp.getTime());
 
     return {
-      containerId: slice[0]?.containerId ?? 'unknown',
-      containerName: slice[0]?.containerName ?? 'unknown',
-      recentLogs: slice,
-      windowStart: slice[0]?.timestamp ?? new Date().toISOString(),
-      windowEnd: slice.at(-1)?.timestamp ?? new Date().toISOString(),
+      containerName: logs[0]?.containerName,
+      windowStart: new Date(Math.min(...timestamps)).toISOString(),
+      windowEnd: new Date(Math.max(...timestamps)).toISOString(),
+      recentLogs: logs,
     };
   }
 }
