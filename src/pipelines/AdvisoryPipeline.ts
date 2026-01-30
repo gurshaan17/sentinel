@@ -20,14 +20,13 @@ export class AdvisoryPipeline {
 
     const advice = this.advisor.generate(analysis, logs);
 
-    //@ts-ignore
-    await this.actionPipeline.handle(advice);
-
     if (!advice) {
       logger.debug('No advisory generated');
       return;
     }
 
+    await this.actionPipeline.handle(advice);
+    
     this.emit(advice);
   }
 

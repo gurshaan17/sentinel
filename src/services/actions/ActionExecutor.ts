@@ -13,10 +13,16 @@ export class ActionExecutor {
           break;
 
         case 'scale_container':
-          await this.docker.scale(
-            proposal.target,
-            Number(proposal.params?.replicas ?? 1)
-          );
+          const replicas = Number(proposal.params?.replicas ?? 1);
+          if (!Number.isFinite(replicas) || replicas <= 0) {
+            return {
+              proposal,
+              executed: false,
+              skippedReason: 'Invalid replicas value',
+              timestamp: new Date(),
+            };
+          }
+          await this.docker.scale(proposal.target, replicas);
           break;
 
         default:
