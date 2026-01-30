@@ -85,7 +85,7 @@ export class AdvisorService {
             : 'No direct action recommended',
         ],
         signals: {
-          container: advice.source.containerName ?? 'unknown',
+          container: advice.source.containerName ?? advice.source.containerId ?? 'unknown',
           severity: advice.severity,
         },
       },
