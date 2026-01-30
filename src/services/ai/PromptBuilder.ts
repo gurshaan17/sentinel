@@ -1,4 +1,4 @@
-import type { AIContext } from '../../types/ai.types';
+import type { AIContext } from '../../types';
 
 export class PromptBuilder {
   build(context: AIContext): string {

@@ -3,11 +3,13 @@ import { AdvisorService } from '../advisors/AdvisorService';
 import { ContextBuilder } from '../services/ai/ContextBuilder';
 import type { ClassifiedLog } from '../types';
 import { logger } from '../utils/logger';
+import { ActionPipeline } from './ActionPipeline';
 
 export class AdvisoryPipeline {
   private ai = new AIService();
   private advisor = new AdvisorService();
   private contextBuilder = new ContextBuilder();
+  private actionPipeline = new ActionPipeline();
 
   async process(logs: ClassifiedLog[]): Promise<void> {
     if (logs.length === 0) return;
@@ -23,6 +25,8 @@ export class AdvisoryPipeline {
       return;
     }
 
+    await this.actionPipeline.handle(advice);
+    
     this.emit(advice);
   }
 
