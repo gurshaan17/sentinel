@@ -57,7 +57,9 @@ export class AdvisorService {
 
   async handleAdvice(advice: Advice) {
     const decisionId = uuidv4();
-    const cooldownKey = `advice:${advice.source.containerName}:${advice.title}`;
+    const containerKey =
+      advice.source.containerId ?? advice.source.containerName ?? 'unknown';
+    const cooldownKey = `advice:${containerKey}:${advice.title}`;
 
     const allowed = this.cooldowns.isAllowed(
       cooldownKey,

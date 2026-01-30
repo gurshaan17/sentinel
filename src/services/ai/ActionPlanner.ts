@@ -45,7 +45,7 @@ export class ActionPlanner {
   
       return {
         action: 'noop',
-        target: advice.source.containerName ?? 'unknown',
+        target: target,
         reason: 'No actionable recommendation',
         confidence: advice.confidence,
       };
