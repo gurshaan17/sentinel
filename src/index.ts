@@ -9,6 +9,7 @@ import { config } from './config';
 import { setupGlobalErrorHandlers } from './middleware/errorHandler';
 import { logRateLimiter } from './middleware/rateLimiter';
 import { logError } from './utils/ErrorLogger';
+import { LogWorker } from './workers';
 
 class Sentinel {
   private dockerService: DockerService;
@@ -18,6 +19,7 @@ class Sentinel {
   private monitor: ContainerMonitor;
   private healthCheck: HealthCheck;
   private healthCheckTimer: Timer | null = null;
+  private worker: LogWorker | null = null;
 
   constructor() {
     this.dockerService = new DockerService();
@@ -46,6 +48,13 @@ class Sentinel {
 
       logger.info('Connecting to Docker...');
       await this.dockerService.connect();
+
+      logger.info('Starting LogWorker...');
+      this.worker = new LogWorker(
+        this.pubsubService.getClient(),
+        config.pubsub.subscriptionName
+      );
+      await this.worker.start();
 
       // Start health checks
       logger.info('Starting health monitoring...');
@@ -101,6 +110,10 @@ class Sentinel {
     if (this.healthCheckTimer) {
       clearInterval(this.healthCheckTimer);
     }
+
+    if (this.worker) {
+      await this.worker.stop();
+    }  
     
     // Stop monitoring
     await this.monitor.stop();

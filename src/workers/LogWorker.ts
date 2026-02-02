@@ -23,7 +23,7 @@ export class LogWorker {
   async start(): Promise<void> {
     logger.info('Starting LogWorker...');
     await this.subscriber.start();
-    logger.info('✅ LogWorker started');
+    logger.info('LogWorker started');
   }
 
   async stop(): Promise<void> {
