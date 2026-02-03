@@ -115,6 +115,9 @@ class Sentinel {
       await this.worker.stop();
     }  
     
+    // Stop rate limiter cleanup
+    logRateLimiter.destroy();
+
     // Stop monitoring
     await this.monitor.stop();
     
