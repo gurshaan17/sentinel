@@ -12,6 +12,12 @@ To run:
 bun run index.ts
 ```
 
+To run the log worker (Pub/Sub consumer):
+
+```bash
+bun run src/worker.ts
+```
+
 # Remove old containers and images
 docker-compose -f docker-compose.test.yml down
 
