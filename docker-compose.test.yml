@@ -33,6 +33,7 @@ services:
       GCP_PROJECT_ID: sentinel17
       PUBSUB_SUBSCRIPTION_NAME: logs-sub
       GOOGLE_APPLICATION_CREDENTIALS: /app/sa.json
+      GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY}
     user: "0:0"
     restart: unless-stopped
 
