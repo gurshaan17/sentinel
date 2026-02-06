@@ -11,7 +11,7 @@ export class AIService {
     const prompt = this.promptBuilder.build(context);
 
     const result = await generateText({
-      model: google(process.env.AI_MODEL || 'gemini-1.5-flash'),
+      model: google(process.env.AI_MODEL || 'gemini-2.5-flash'),
       prompt,
       //@ts-ignore
       maxTokens: Number(process.env.AI_MAX_TOKENS || 512),
