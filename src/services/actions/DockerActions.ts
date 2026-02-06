@@ -16,8 +16,7 @@ export class DockerActions {
         throw new Error(`Container ${containerName} not found`);
       }
       
-      const dockerContainer = this.dockerService['docker'].getContainer(container.id);
-      await dockerContainer.restart();
+      await this.dockerService.restartContainer(container.id);
       
       logger.info({ containerName, containerId: container.id }, 
         'Container restarted successfully');

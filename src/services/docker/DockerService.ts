@@ -44,6 +44,11 @@ export class DockerService {
     return this.logStreamer;
   }
 
+  async restartContainer(containerId: string): Promise<void> {
+    const container = this.docker.getContainer(containerId);
+    await container.restart();
+  }
+
   // Event listeners for container lifecycle
   async watchEvents(callback: (event: DockerEvent) => void): Promise<void> {
     const stream = await this.docker.getEvents();

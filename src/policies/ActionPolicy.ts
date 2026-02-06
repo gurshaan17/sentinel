@@ -45,7 +45,14 @@ export class ActionPolicy {
 
     // Check 5: Scaling limits
     if (proposal.action === 'scale_container') {
-      const replicas = Number(proposal.params?.replicas ?? 0);
+      const replicas = Number(proposal.params?.replicas);
+
+      if (!Number.isFinite(replicas) || !Number.isInteger(replicas)) {
+        return {
+          allowed: false,
+          reason: `Invalid replicas: ${proposal.params?.replicas}`,
+        };
+      }
       
       if (replicas > config.safety.maxScaleUp) {
         return {
