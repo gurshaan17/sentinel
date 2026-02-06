@@ -50,11 +50,17 @@ export class Subscriber {
       this.subscription.on('message', this.handleMessage.bind(this));
       this.subscription.on('error', this.handleError.bind(this));
     } else {
-      await this.ensurePullClient();
-      logger.info(
-        `Subscriber using pull mode every ${pubsubConfig.subscriber.pullIntervalMs}ms`
-      );
-      this.startPullLoop();
+      try {
+        await this.ensurePullClient();
+        logger.info(
+          `Subscriber using pull mode every ${pubsubConfig.subscriber.pullIntervalMs}ms`
+        );
+        this.startPullLoop();
+      } catch (error) {
+        this.isListening = false;
+        logError('Failed to start pull-mode subscriber', error);
+        throw error;
+      }
     }
 
     logger.info('✅ Subscriber started');
@@ -137,7 +143,6 @@ export class Subscriber {
           }
           return;
         }
-        data.log.timestamp = parsedTimestamp;
       }
 
       logger.debug(`Received message ${data.id} from PubSub`);
@@ -184,6 +189,18 @@ export class Subscriber {
   private async handleMessage(message: Message): Promise<void> {
     try {
       const data = JSON.parse(message.data.toString()) as PubSubMessage;
+
+      if (data.log?.timestamp && !(data.log.timestamp instanceof Date)) {
+        const parsedTimestamp = new Date(data.log.timestamp as unknown as string);
+        if (Number.isNaN(parsedTimestamp.getTime())) {
+          logError('Invalid log timestamp received from PubSub', {
+            timestamp: data.log.timestamp,
+            messageId: data.id,
+          });
+          message.nack();
+          return;
+        }
+      }
       
       logger.debug(`Received message ${data.id} from PubSub`);
 
