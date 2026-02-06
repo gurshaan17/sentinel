@@ -18,7 +18,6 @@ class Sentinel {
   private monitor: ContainerMonitor;
   private healthCheck: HealthCheck;
   private healthCheckTimer: Timer | null = null;
-
   constructor() {
     this.dockerService = new DockerService();
     this.pubsubService = new PubSubService();
@@ -101,7 +100,10 @@ class Sentinel {
     if (this.healthCheckTimer) {
       clearInterval(this.healthCheckTimer);
     }
-    
+
+    // Stop rate limiter cleanup
+    logRateLimiter.destroy();
+
     // Stop monitoring
     await this.monitor.stop();
     

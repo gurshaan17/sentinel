@@ -187,6 +187,10 @@ export class PubSubService {
     }
   }
 
+  getClient(): PubSub {
+    return this.pubsub;
+  }
+
   async close(): Promise<void> {
     await this.pubsub.close();
     logger.info('PubSub connection closed');

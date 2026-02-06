@@ -1,6 +1,7 @@
 import { dockerConfig } from "./docker.config";
 import { loggerConfig } from "./logger.config";
 import { pubsubConfig } from "./pubsub.config";
+import { safetyConfig } from "./safety.config";
 
 export const config = {
     docker: dockerConfig,
@@ -21,6 +22,8 @@ export const config = {
     },
     
     logging: loggerConfig,
+
+    safety: safetyConfig,
   } as const;
   
   // Validate required config

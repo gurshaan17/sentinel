@@ -12,12 +12,29 @@ services:
       LOG_LEVEL: debug
       GCP_PROJECT_ID: sentinel17
       PUBSUB_TOPIC_NAME: logs
+      PUBSUB_SUBSCRIPTION_NAME: logs-sub
       GOOGLE_APPLICATION_CREDENTIALS: /app/sa.json
     user: "0:0"
     restart: unless-stopped
     depends_on:
       - test-app-1
       - test-app-2
+      - worker
+
+  worker:
+    build: .
+    container_name: sentinel-worker
+    command: bun run src/worker.ts
+    volumes:
+      - ./sentinel-sa.json:/app/sa.json:ro
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      GCP_PROJECT_ID: sentinel17
+      PUBSUB_SUBSCRIPTION_NAME: logs-sub
+      GOOGLE_APPLICATION_CREDENTIALS: /app/sa.json
+    user: "0:0"
+    restart: unless-stopped
 
   test-app-1:
     build: ./test-app
